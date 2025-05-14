@@ -10,7 +10,7 @@ A modern, unified campus student service platform for Deakin University, providi
 - **Authentication**: Login, signup, logout, and page access control
 
 ## Tech Stack
-- **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
+- **Frontend**: HTML5, CSS3, JavaScript
 - **Backend**: Java + Tomcat (not included in this prototype)
 - **Database**: MySQL (not included in this prototype)
 
@@ -36,5 +36,5 @@ A modern, unified campus student service platform for Deakin University, providi
 ```
 
 ## Author
-- Deakin Nexus Prototype by [Your Name]
+- Shicheng Xiang
 - For SIT317 HD Project 
