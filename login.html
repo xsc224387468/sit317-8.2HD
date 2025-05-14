@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Deakin Nexus - Log In</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .login-main {
+      max-width: 500px;
+      margin: 60px auto 0 auto;
+      background: transparent;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .login-title {
+      font-size: 2.5rem;
+      color: #234075;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 36px;
+      margin-top: 24px;
+    }
+    .login-form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      align-items: center;
+    }
+    .login-form label {
+      width: 100%;
+      color: #234075;
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+    .login-form input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1.5px solid #b5c6e0;
+      font-size: 1.1rem;
+      margin-top: 6px;
+      margin-bottom: 2px;
+      background: #fff;
+      transition: border 0.2s;
+    }
+    .login-form input:focus {
+      border: 1.5px solid #234075;
+      outline: none;
+    }
+    .login-btn {
+      width: 60%;
+      margin: 18px auto 0 auto;
+      background: #234075;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 0;
+      font-size: 1.3rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: block;
+    }
+    .login-btn:hover {
+      background: #2b6cb0;
+    }
+    .login-link {
+      margin-top: 18px;
+      text-align: center;
+    }
+    .login-link a {
+      color: #234075;
+      font-size: 1.1rem;
+      text-decoration: underline;
+      transition: color 0.2s;
+    }
+    .login-link a:hover {
+      color: #2b6cb0;
+    }
+  </style>
+  <script>
+    // Redirect to home if already logged in
+    if (localStorage.getItem('loggedIn')) {
+      window.location.href = 'index.html';
+    }
+  </script>
+</head>
+<body>
+  <nav class="main-nav">
+    <div class="logo-area">
+      <img src="assets/images/campus_logo.png" alt="Deakin Nexus Logo" class="logo">
+      <span class="brand">Deakin Nexus</span>
+    </div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="schedule.html">Schedule</a>
+      <a href="club.html">Club</a>
+      <a href="chat.html">Chat</a>
+      <a href="login.html">Log in</a>
+    </div>
+  </nav>
+  <main class="login-main">
+    <div class="login-title">Log in to your account</div>
+    <form class="login-form" id="login-form">
+      <label>Deakin Email
+        <input type="email" id="login-email" placeholder="Please enter">
+      </label>
+      <label>Password
+        <input type="password" id="login-password" placeholder="Please enter">
+      </label>
+      <button type="submit" class="login-btn">Log in</button>
+    </form>
+    <div class="login-link">
+      <a href="signup.html">Sign up</a>
+    </div>
+  </main>
+  <script>
+    document.getElementById('login-form').onsubmit = function(e) {
+      e.preventDefault();
+      // You can add real validation here
+      localStorage.setItem('loggedIn', 'true');
+      window.location.href = 'index.html';
+    };
+    if (localStorage.getItem('loggedIn')) {
+      var loginLink = document.getElementById('login-link');
+      var logoutLink = document.getElementById('logout-link');
+      if (loginLink) loginLink.style.display = 'none';
+      if (logoutLink) {
+        logoutLink.style.display = 'inline';
+        logoutLink.onclick = function() {
+          localStorage.removeItem('loggedIn');
+          window.location.href = 'login.html';
+        }
+      }
+    }
+  </script>
+</body>
+</html> 

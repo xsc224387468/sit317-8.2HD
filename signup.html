@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Deakin Nexus - Sign Up</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .signup-main {
+      max-width: 500px;
+      margin: 60px auto 0 auto;
+      background: transparent;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .signup-title {
+      font-size: 2.5rem;
+      color: #234075;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 36px;
+      margin-top: 24px;
+    }
+    .signup-form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      align-items: center;
+    }
+    .signup-form label {
+      width: 100%;
+      color: #234075;
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+    .signup-form input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1.5px solid #b5c6e0;
+      font-size: 1.1rem;
+      margin-top: 6px;
+      margin-bottom: 2px;
+      background: #fff;
+      transition: border 0.2s;
+    }
+    .signup-form input:focus {
+      border: 1.5px solid #234075;
+      outline: none;
+    }
+    .signup-btn {
+      width: 60%;
+      margin: 18px auto 0 auto;
+      background: #234075;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 0;
+      font-size: 1.3rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: block;
+    }
+    .signup-btn:hover {
+      background: #2b6cb0;
+    }
+    .signup-link {
+      margin-top: 18px;
+      text-align: center;
+    }
+    .signup-link a {
+      color: #234075;
+      font-size: 1.1rem;
+      text-decoration: underline;
+      transition: color 0.2s;
+    }
+    .signup-link a:hover {
+      color: #2b6cb0;
+    }
+  </style>
+  <script>
+    // Redirect to home if already logged in
+    if (localStorage.getItem('loggedIn')) {
+      window.location.href = 'index.html';
+    }
+  </script>
+</head>
+<body>
+  <nav class="main-nav">
+    <div class="logo-area">
+      <img src="assets/images/campus_logo.png" alt="Deakin Nexus Logo" class="logo">
+      <span class="brand">Deakin Nexus</span>
+    </div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="schedule.html">Schedule</a>
+      <a href="club.html">Club</a>
+      <a href="chat.html">Chat</a>
+      <a href="login.html">Log in</a>
+    </div>
+  </nav>
+  <main class="signup-main">
+    <div class="signup-title">Create your account</div>
+    <form class="signup-form" id="signup-form">
+      <label>Deakin Email
+        <input type="email" id="signup-email" placeholder="Please enter">
+      </label>
+      <label>Your Name
+        <input type="text" id="signup-name" placeholder="Please enter">
+      </label>
+      <label>Password
+        <input type="password" id="signup-password" placeholder="Please enter">
+      </label>
+      <label>Confirm Password
+        <input type="password" id="signup-confirm" placeholder="Please enter">
+      </label>
+      <button type="submit" class="signup-btn">Sign up</button>
+    </form>
+    <div class="signup-link">
+      <a href="login.html">Log in</a>
+    </div>
+  </main>
+  <script>
+    document.getElementById('signup-form').onsubmit = function(e) {
+      e.preventDefault();
+      // You can add real validation here
+      window.location.href = 'login.html';
+    };
+    if (localStorage.getItem('loggedIn')) {
+      var loginLink = document.getElementById('login-link');
+      var logoutLink = document.getElementById('logout-link');
+      if (loginLink) loginLink.style.display = 'none';
+      if (logoutLink) {
+        logoutLink.style.display = 'inline';
+        logoutLink.onclick = function() {
+          localStorage.removeItem('loggedIn');
+          window.location.href = 'login.html';
+        }
+      }
+    }
+  </script>
+</body>
+</html> 

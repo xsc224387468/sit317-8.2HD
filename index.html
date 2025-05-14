@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Deakin Nexus - Home</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    // Redirect to login if not logged in and not on login/signup page
+    if (!localStorage.getItem('loggedIn') &&
+        !location.pathname.endsWith('login.html') &&
+        !location.pathname.endsWith('signup.html')) {
+      window.location.href = 'login.html';
+    }
+  </script>
+</head>
+<body>
+  <nav class="main-nav">
+    <div class="logo-area">
+      <img src="assets/images/campus_logo.png" alt="Deakin Nexus Logo" class="logo">
+      <span class="brand">Deakin Nexus</span>
+    </div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="schedule.html">Schedule</a>
+      <a href="club.html">Clubs</a>
+      <a href="chat.html">Chat</a>
+      <a href="login.html" id="login-link">Login</a>
+      <a href="#" id="logout-link" style="display:none;">Log out</a>
+    </div>
+  </nav>
+  <main class="home-hero">
+    <div class="hero-content">
+      <h1>Connecting people on campus</h1>
+      <p class="subtitle">Stay connected with events, clubs, and chat with fellow students</p>
+    </div>
+    <div class="hero-illustration">
+      <img src="assets/images/campus_illustration.png" alt="Campus Illustration">
+    </div>
+    <div class="feature-cards">
+      <div class="feature-card">
+        <img src="assets/images/schedule_icon.png" alt="Schedule Icon" class="icon">
+        <h2>My Schedule</h2>
+        <p>View your upcoming events and classes</p>
+      </div>
+      <div class="feature-card">
+        <img src="assets/images/clubs_icon.png" alt="Clubs Icon" class="icon">
+        <h2>Explore Clubs</h2>
+        <p>Find and join student clubs on campus</p>
+      </div>
+      <div class="feature-card">
+        <img src="assets/images/chat_icon.png" alt="Chat Icon" class="icon">
+        <h2>Join a Chat Room</h2>
+        <p>Chat with other students in real time</p>
+      </div>
+    </div>
+  </main>
+  <script>
+    // Show/hide Log out button
+    if (localStorage.getItem('loggedIn')) {
+      document.getElementById('login-link').style.display = 'none';
+      document.getElementById('logout-link').style.display = 'inline';
+      document.getElementById('logout-link').onclick = function() {
+        localStorage.removeItem('loggedIn');
+        window.location.href = 'login.html';
+      }
+    }
+  </script>
+</body>
+</html> 

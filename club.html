@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Deakin Nexus - Clubs</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .club-main {
+      max-width: 1200px;
+      width: 96%;
+      margin: 0 auto 24px auto;
+      padding: 0 32px 40px 32px;
+      background: #fff;
+      border-radius: 0 0 16px 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+      min-height: 600px;
+    }
+    .club-carousel {
+      width: 600px;
+      margin: 0 auto 40px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8fbff;
+      border-radius: 20px;
+      box-shadow: 0 2px 12px rgba(44,62,80,0.08);
+      position: relative;
+      height: 280px;
+    }
+    .carousel-arrow {
+      background: #e6f0fa;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 1.5rem;
+      color: #234075;
+      cursor: pointer;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+      transition: background 0.2s;
+    }
+    .carousel-arrow:hover { background: #d0e2fa; }
+    .carousel-arrow.left { left: 16px; }
+    .carousel-arrow.right { right: 16px; }
+    .carousel-img {
+      width: 100%;
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border-radius: 12px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .carousel-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #fff;
+      border-radius: 12px;
+      display: block;
+    }
+    .club-columns {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      margin-top: 32px;
+    }
+    .club-col {
+      flex: 1;
+      min-width: 260px;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .club-title {
+      font-size: 2.5rem;
+      color: #234075;
+      font-weight: bold;
+      text-align: center;
+      margin: 48px 0 32px 0;
+    }
+    .club-section-title {
+      font-size: 2rem;
+      color: #234075;
+      font-weight: bold;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .club-card {
+      background: #f8fbff;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+      padding: 28px 20px 18px 20px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      min-height: 110px;
+    }
+    .club-card img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 10px;
+    }
+    .club-card .join-btn {
+      font-size: 1.08rem;
+      padding: 9px 22px;
+      margin-top: 14px;
+    }
+    .club-card div[style*='font-size:1.3rem'] {
+      font-size: 1.25rem !important;
+      margin-bottom: 10px !important;
+    }
+    .join-btn {
+      background: #e6f0fa;
+      color: #234075;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 24px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-top: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .join-btn:hover { background: #d0e2fa; }
+    .chat-modal-overlay {
+      position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.18); display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .chat-modal {
+      background: #fff; border-radius: 16px; width: 400px; max-width: 95vw;
+      box-shadow: 0 4px 24px rgba(44,62,80,0.13); padding: 24px 18px 12px 18px; position: relative;
+      display: flex; flex-direction: column; min-height: 180px; max-height: 80vh;
+    }
+    .close-btn {
+      position: absolute; right: 16px; top: 12px; background: none; border: none; font-size: 2rem; color: #234075; cursor: pointer;
+    }
+    .join-btn { margin-top: 12px; }
+  </style>
+  <script>
+    if (!localStorage.getItem('loggedIn') &&
+        !location.pathname.endsWith('login.html') &&
+        !location.pathname.endsWith('signup.html')) {
+      window.location.href = 'login.html';
+    }
+    // 轮播图片数组只用 club_activity1.png 和 club_activity2.png
+    const carouselImgs = [
+      'assets/images/club_activity1.png',
+      'assets/images/club_activity2.png'
+    ];
+    let carouselIdx = 0;
+    function showCarousel(idx) {
+      const img = document.getElementById('carousel-img');
+      img.src = carouselImgs[idx];
+    }
+    function prevCarousel() {
+      carouselIdx = (carouselIdx - 1 + carouselImgs.length) % carouselImgs.length;
+      showCarousel(carouselIdx);
+    }
+    function nextCarousel() {
+      carouselIdx = (carouselIdx + 1) % carouselImgs.length;
+      showCarousel(carouselIdx);
+    }
+    window.onload = function() {
+      showCarousel(carouselIdx);
+    };
+    // 招聘信息弹窗
+    function openRecruitModal() {
+      document.getElementById('recruit-modal').style.display = 'flex';
+    }
+    function closeRecruitModal() {
+      document.getElementById('recruit-modal').style.display = 'none';
+    }
+  </script>
+</head>
+<body>
+  <nav class="main-nav">
+    <div class="logo-area">
+      <img src="assets/images/campus_logo.png" alt="Deakin Nexus Logo" class="logo">
+      <span class="brand">Deakin Nexus</span>
+    </div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="schedule.html">Schedule</a>
+      <a href="club.html">Clubs</a>
+      <a href="chat.html">Chat</a>
+      <a href="login.html" id="login-link">Login</a>
+      <a href="#" id="logout-link" style="display:none;">Log out</a>
+    </div>
+  </nav>
+  <main class="club-main">
+    <div class="club-title">Clubs</div>
+    <div class="club-carousel">
+      <button class="carousel-arrow left" onclick="prevCarousel()">&#60;</button>
+      <div class="carousel-img"><img id="carousel-img" src="" alt="Club Activity"></div>
+      <button class="carousel-arrow right" onclick="nextCarousel()">&#62;</button>
+    </div>
+    <div class="club-columns">
+      <div class="club-col">
+        <div class="club-section-title">Club Recruitment</div>
+        <div class="club-card" style="cursor:pointer;" onclick="openRecruitModal()">
+          <div style="font-size:1.3rem;font-weight:bold;margin-bottom:8px;">Photography Club</div>
+          <button class="join-btn">Join</button>
+        </div>
+      </div>
+      <div class="club-col">
+        <div class="club-section-title">Upcoming Activities</div>
+        <div class="club-card">
+          <img src="assets/images/upcoming_activities.png" alt="Upcoming Activity">
+        </div>
+      </div>
+    </div>
+  </main>
+  <script>
+    if (localStorage.getItem('loggedIn')) {
+      document.getElementById('login-link').style.display = 'none';
+      document.getElementById('logout-link').style.display = 'inline';
+      document.getElementById('logout-link').onclick = function() {
+        localStorage.removeItem('loggedIn');
+        window.location.href = 'login.html';
+      }
+    }
+  </script>
+  <!-- 招聘信息弹窗 -->
+  <div class="chat-modal-overlay" id="recruit-modal" style="display:none;">
+    <div class="chat-modal" style="min-width:320px;max-width:90vw;">
+      <button class="close-btn" onclick="closeRecruitModal()">&times;</button>
+      <h2>Photography Club Recruitment</h2>
+      <div style="margin:18px 0 12px 0;line-height:1.7;">
+        <b>Join the Photography Club!</b><br>
+        We are looking for passionate students who love photography.<br>
+        Activities include photo walks, workshops, competitions, and more.<br>
+        <b>How to join:</b> Click the Join button or contact us at photo@deakin.edu.au
+      </div>
+      <button class="join-btn" onclick="closeRecruitModal()">Join Now</button>
+    </div>
+  </div>
+</body>
+</html> 

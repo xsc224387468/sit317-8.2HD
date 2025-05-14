@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Deakin Nexus - Schedule</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    .schedule-title {
+      font-size: 2.5rem;
+      color: #234075;
+      font-weight: bold;
+      text-align: center;
+      margin: 48px 0 24px 0;
+    }
+    .schedule-tabs {
+      display: flex;
+      gap: 0;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+    .tab-btn {
+      background: #fff;
+      border: 2px solid #234075;
+      color: #234075;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border-radius: 8px 8px 0 0;
+      padding: 10px 40px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      margin-right: -2px;
+    }
+    .tab-btn.active, .tab-btn:hover {
+      background: #234075;
+      color: #fff;
+      border-bottom: 2px solid #fff;
+    }
+    .today-section {
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .today-title {
+      font-size: 2rem;
+      color: #234075;
+      font-weight: bold;
+      margin: 32px 0 32px 0;
+      text-align: center;
+    }
+    .today-card {
+      width: 100%;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 4px 24px rgba(44, 62, 80, 0.10);
+      display: flex;
+      align-items: center;
+      padding: 28px 32px;
+      margin-bottom: 28px;
+      gap: 24px;
+      position: relative;
+    }
+    .today-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: #e6f0fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #234075;
+      flex-shrink: 0;
+    }
+    .today-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .today-time {
+      font-weight: bold;
+      color: #234075;
+      font-size: 1.15rem;
+      margin-bottom: 2px;
+    }
+    .today-name {
+      color: #234075;
+      font-size: 1.15rem;
+      font-weight: 500;
+    }
+    .today-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 120px;
+    }
+    .today-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f8fbff;
+      border-radius: 16px;
+      padding: 6px 18px;
+      font-size: 1.1rem;
+      color: #234075;
+      font-weight: 500;
+    }
+    .today-status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #1bbf5c;
+      display: inline-block;
+    }
+    .today-location {
+      color: #234075;
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-right: 4px;
+    }
+    .today-arrow {
+      width: 22px;
+      height: 22px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .schedule-cell {
+      background: #f8fbff;
+      border: 1px solid #e2e8f0;
+      padding: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .schedule-cell:hover {
+      background: #e6f0fa;
+    }
+    .cell-content {
+      font-size: 0.9rem;
+    }
+    .cell-name {
+      font-weight: 500;
+      color: #234075;
+      margin-bottom: 4px;
+    }
+    .cell-location {
+      font-size: 0.8rem;
+      color: #666;
+    }
+    .week-table th, .week-table td {
+      border: 1.5px solid #e2e8f0;
+      padding: 0;
+      text-align: center;
+      min-width: 110px;
+      height: 56px;
+      background: #fff;
+      font-family: 'Segoe UI', 'Arial', sans-serif;
+      font-size: 1rem;
+    }
+    .week-table th {
+      background: #f8fbff;
+      color: #234075;
+      font-weight: bold;
+      font-size: 1.08rem;
+      height: 48px;
+    }
+    .calendar-cell {
+      background: #fff;
+      padding: 0;
+      vertical-align: middle;
+      position: relative;
+    }
+    .calendar-event {
+      background: #fff;
+      color: #234075;
+      border-radius: 0;
+      font-weight: 600;
+      font-size: 1.08rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      border: none;
+      box-shadow: none;
+      letter-spacing: 0.2px;
+      text-align: center;
+      transition: background 0.2s;
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+    }
+    .calendar-event:hover {
+      background: #f8fbff;
+    }
+    .calendar-event.active {
+      background: #234075;
+      color: #fff;
+    }
+    .calendar-event .event-title {
+      font-weight: bold;
+      font-size: 1.08rem;
+      margin-bottom: 2px;
+      letter-spacing: 0.5px;
+    }
+    .calendar-event .event-time {
+      font-size: 0.97rem;
+      color: #dbeafe;
+      margin-bottom: 2px;
+    }
+    .calendar-event .event-location {
+      font-size: 0.93rem;
+      color: #c7d2fe;
+    }
+    .occupied {
+      background: transparent;
+      border: none;
+      pointer-events: none;
+    }
+    .empty {
+      background: #fff;
+    }
+  </style>
+  <script>
+    if (!localStorage.getItem('loggedIn') &&
+        !location.pathname.endsWith('login.html') &&
+        !location.pathname.endsWith('signup.html')) {
+      window.location.href = 'login.html';
+    }
+    // 课程数据
+    let scheduleData = {
+      Monday: [
+        {time: '9:00 AM – 11:00 AM', name: 'Computer Networks', location: 'Room N112', desc: 'Learn about network protocols, topologies, and more.', type: 'lecture'},
+        {time: '2:00 PM – 3:00 PM', name: 'Meetup', location: 'Student Central', desc: 'Networking event for all students.', type: 'meeting'},
+        {time: '4:00 PM – 5:30 PM', name: 'Group Study', location: 'Library', desc: 'Collaborative study session for exam prep.', type: 'study'}
+      ],
+      Tuesday: [
+        {time: '10:00 AM – 12:00 PM', name: 'Database Systems', location: 'Room N215', desc: 'Database design and implementation.', type: 'lecture'},
+        {time: '2:00 PM – 4:00 PM', name: 'Programming Lab', location: 'Lab 3', desc: 'Practical programming exercises.', type: 'lab'}
+      ],
+      Wednesday: [
+        {time: '9:00 AM – 10:00 AM', name: 'Tutorial', location: 'Room N112', desc: 'Weekly tutorial session.', type: 'tutorial'},
+        {time: '1:00 PM – 3:00 PM', name: 'Project Meeting', location: 'Meeting Room 2', desc: 'Group project discussion.', type: 'meeting'}
+      ],
+      Thursday: [
+        {time: '11:00 AM – 1:00 PM', name: 'Web Development', location: 'Room N215', desc: 'Frontend and backend development.', type: 'lecture'},
+        {time: '3:00 PM – 5:00 PM', name: 'Workshop', location: 'Lab 1', desc: 'Hands-on coding workshop.', type: 'workshop'}
+      ],
+      Friday: [
+        {time: '9:00 AM – 12:00 PM', name: 'Final Project', location: 'Room N112', desc: 'Project presentation and review.', type: 'exam'},
+        {time: '2:00 PM – 4:00 PM', name: 'Study Group', location: 'Library', desc: 'Group study session.', type: 'study'}
+      ]
+    };
+    let currentDay = 'Monday';
+    let editMode = false;
+    let editDay = null;
+    let editIdx = null;
+    let selectedDay = null;
+    let selectedIdx = null;
+    function showTab(tab) {
+      const todayView = document.getElementById('today-view');
+      const weekView = document.getElementById('week-view');
+      const tabToday = document.getElementById('tab-today');
+      const tabWeek = document.getElementById('tab-week');
+
+      if (todayView) todayView.style.display = tab === 'today' ? 'block' : 'none';
+      if (weekView) weekView.style.display = tab === 'week' ? 'block' : 'none';
+      if (tabToday) tabToday.classList.toggle('active', tab === 'today');
+      if (tabWeek) tabWeek.classList.toggle('active', tab === 'week');
+    }
+    function openModal(id) {
+      document.getElementById(id).style.display = 'flex';
+    }
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+      if(id==='modal-add') resetAddForm();
+    }
+    function switchDay(day) {
+      if (day === 'Switch to Daily View') return;
+      currentDay = day;
+      document.getElementById('today-label').innerText = day + "'s Schedule";
+      showTab('today');
+      renderToday();
+    }
+    function renderToday() {
+      const list = document.getElementById('today-list');
+      list.innerHTML = '';
+      console.log('Current day:', currentDay);
+      console.log('Schedule data:', scheduleData[currentDay]);
+      
+      if (!scheduleData[currentDay] || scheduleData[currentDay].length === 0) {
+        list.innerHTML = '<div class="today-card">No classes scheduled for today</div>';
+        return;
+      }
+
+      scheduleData[currentDay].forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = 'today-card';
+        card.onclick = () => showDetail(idx);
+        card.innerHTML = `
+          <div class="today-icon">${getIcon(item.name)}</div>
+          <div class="today-info">
+            <div class="today-time">${item.time}</div>
+            <div class="today-name">${item.name}</div>
+          </div>
+          <div class="today-right">
+            <span class="today-location">${item.location}</span>
+            <span class="today-arrow">&#8594;</span>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+    function getIcon(name) {
+      const lowerName = name.toLowerCase();
+      if(lowerName.includes('computer') || lowerName.includes('network')) return '💻';
+      if(lowerName.includes('meet')) return '👥';
+      if(lowerName.includes('study') || lowerName.includes('group')) return '📚';
+      if(lowerName.includes('lab')) return '🔬';
+      if(lowerName.includes('lecture')) return '📝';
+      if(lowerName.includes('tutorial')) return '✏️';
+      if(lowerName.includes('exam')) return '📋';
+      if(lowerName.includes('workshop')) return '🛠️';
+      return '📘';
+    }
+    function showDetail(idx) {
+      selectedDay = currentDay;
+      selectedIdx = idx;
+      const item = scheduleData[currentDay][idx];
+      document.getElementById('modal-detail-title').innerText = item.name;
+      document.getElementById('modal-detail-time').innerText = item.time;
+      document.getElementById('modal-detail-location').innerText = item.location;
+      document.getElementById('modal-detail-desc').innerText = item.desc || '';
+      openModal('modal-detail');
+    }
+    function resetAddForm() {
+      editMode = false; editDay = null; editIdx = null;
+      document.getElementById('add-title').innerText = 'Add or Edit Class';
+      document.getElementById('add-name').value = '';
+      document.getElementById('add-day').value = 'Monday';
+      document.getElementById('add-time').value = '';
+      document.getElementById('add-location').value = '';
+      document.getElementById('add-desc').value = '';
+      document.getElementById('delete-btn').style.display = 'none';
+    }
+    function editClass(day, idx) {
+      editMode = true;
+      editDay = day;
+      editIdx = idx;
+      const item = scheduleData[day][idx];
+      document.getElementById('add-title').innerText = 'Edit Class';
+      document.getElementById('add-name').value = item.name;
+      document.getElementById('add-day').value = day;
+      document.getElementById('add-time').value = item.time;
+      document.getElementById('add-location').value = item.location;
+      document.getElementById('add-desc').value = item.desc || '';
+      document.getElementById('delete-btn').style.display = 'inline-block';
+      openModal('modal-add');
+    }
+    function editSelectedClass() {
+      closeModal('modal-detail');
+      openModal('modal-add');
+    }
+    function deleteSelectedClass() {
+      if(selectedDay!==null && selectedIdx!==null) {
+        scheduleData[selectedDay].splice(selectedIdx,1);
+        closeModal('modal-detail');
+        renderToday();
+        renderWeek();
+      }
+    }
+    function addClassSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('add-name').value.trim();
+      const day = document.getElementById('add-day').value;
+      const time = document.getElementById('add-time').value.trim();
+      const location = document.getElementById('add-location').value.trim();
+      const desc = document.getElementById('add-desc').value.trim();
+      if(!name||!day||!time||!location) return alert('Please fill all fields');
+      // Check time format
+      const timePattern = /^\d{1,2}:\d{2} (AM|PM) – \d{1,2}:\d{2} (AM|PM)$/;
+      if(!timePattern.test(time)) return alert('Time format must be e.g. 9:00 AM – 10:00 AM');
+      if(editMode) {
+        scheduleData[editDay][editIdx] = {time, name, location, desc};
+      } else {
+        if(!scheduleData[day]) scheduleData[day] = [];
+        scheduleData[day].push({time, name, location, desc});
+      }
+      closeModal('modal-add');
+      filterScheduleDataToTimes();
+      if(currentDay===day||currentDay===editDay) renderToday();
+      renderWeek();
+    }
+    function deleteClass() {
+      if(editMode && editDay!==null && editIdx!==null) {
+        scheduleData[editDay].splice(editIdx,1);
+        closeModal('modal-add');
+        if(currentDay===editDay) renderToday();
+        renderWeek();
+      }
+    }
+    function renderWeek() {
+      const days = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+      const times = [
+        '9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM',
+        '3:00 PM','4:00 PM','5:00 PM'
+      ];
+      const table = document.getElementById('week-tbody');
+      table.innerHTML = '';
+
+      // 记录每个单元格是否被课程占用
+      const occupied = {};
+      days.forEach(day => { occupied[day] = Array(times.length).fill(false); });
+
+      // 标记被占用格
+      days.forEach(day => {
+        (scheduleData[day]||[]).forEach(event => {
+          const [start, end] = event.time.split(' – ');
+          const startIdx = times.indexOf(start);
+          let endIdx = times.indexOf(end);
+          if (endIdx === -1) endIdx = times.length;
+          for(let i=startIdx+1;i<endIdx;i++) occupied[day][i]=true;
+        });
+      });
+
+      // 渲染每一行
+      for(let rowIdx=0; rowIdx<times.length; rowIdx++) {
+        const tr = document.createElement('tr');
+        // 时间列
+        const timeTd = document.createElement('td');
+        timeTd.textContent = times[rowIdx];
+        tr.appendChild(timeTd);
+
+        // 每天
+        for(let dayIdx=0; dayIdx<days.length; dayIdx++) {
+          const day = days[dayIdx];
+          if (occupied[day][rowIdx]) continue; // 跳过被占用格
+          // 查找该时间段是否有课程开始
+          const event = (scheduleData[day]||[]).find(item => {
+            const [start] = item.time.split(' – ');
+            return start === times[rowIdx];
+          });
+          if (event) {
+            // 计算跨多少格
+            const [start, end] = event.time.split(' – ');
+            const startIdx = times.indexOf(start);
+            let endIdx = times.indexOf(end);
+            if (endIdx === -1) endIdx = times.length;
+            const duration = Math.max(1, endIdx - startIdx);
+            // 渲染课程卡片（rowSpan合并单元格）
+            const td = document.createElement('td');
+            td.className = 'calendar-cell';
+            td.rowSpan = duration;
+            td.style.verticalAlign = 'middle';
+            td.style.padding = '0';
+            td.style.height = `calc(${duration} * 56px)`;
+            td.colSpan = 1;
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'calendar-event';
+            eventDiv.innerHTML = `
+              <div style="font-weight:600;font-size:1.08rem;margin-bottom:2px;">${event.name}</div>
+              <div style="font-size:0.97rem;color:#6b7a99;font-weight:400;">${event.location||''}</div>
+            `;
+            eventDiv.onclick = () => {
+              // 移除所有卡片的 active
+              document.querySelectorAll('.calendar-event').forEach(el => el.classList.remove('active'));
+              // 当前卡片加 active
+              eventDiv.classList.add('active');
+              document.getElementById('modal-detail-title').innerText = event.name;
+              document.getElementById('modal-detail-time').innerText = event.time;
+              document.getElementById('modal-detail-location').innerText = event.location || '';
+              document.getElementById('modal-detail-desc').innerText = event.desc || '';
+              openModal('modal-detail');
+            };
+            td.appendChild(eventDiv);
+            tr.appendChild(td);
+          } else {
+            // 空白单元格
+            const td = document.createElement('td');
+            td.className = 'empty';
+            td.innerHTML = '';
+            tr.appendChild(td);
+          }
+        }
+        table.appendChild(tr);
+      }
+    }
+    function calculateDuration(timeRange) {
+      const [start, end] = timeRange.split(' – ');
+      const startHour = parseInt(start.split(':')[0]);
+      const endHour = parseInt(end.split(':')[0]);
+      const startPeriod = start.includes('PM') ? 12 : 0;
+      const endPeriod = end.includes('PM') ? 12 : 0;
+      return (endHour + endPeriod) - (startHour + startPeriod);
+    }
+    function exportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text('Weekly Schedule', 10, 10);
+      let y = 20;
+      const days = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+      days.forEach(day => {
+        doc.text(day+':', 10, y);
+        (scheduleData[day]||[]).forEach(item => {
+          y+=8;
+          doc.text(`- ${item.time} ${item.name} (${item.location})`, 16, y);
+        });
+        y+=10;
+      });
+      doc.save('schedule.pdf');
+    }
+    function filterScheduleDataToTimes() {
+      const times = [
+        '9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM',
+        '3:00 PM','4:00 PM','5:00 PM'
+      ];
+      Object.keys(scheduleData).forEach(day => {
+        scheduleData[day] = (scheduleData[day]||[]).filter(ev => {
+          if (!ev.time) return false;
+          const [start, end] = ev.time.split(' – ').map(s => s.trim());
+          return times.includes(start) && times.includes(end);
+        });
+      });
+    }
+    window.onload = function() {
+      showTab('today');
+      renderToday();
+      filterScheduleDataToTimes();
+      renderWeek();
+    };
+    if (localStorage.getItem('loggedIn')) {
+      document.getElementById('login-link').style.display = 'none';
+      document.getElementById('logout-link').style.display = 'inline';
+      document.getElementById('logout-link').onclick = function() {
+        localStorage.removeItem('loggedIn');
+        window.location.href = 'login.html';
+      }
+    }
+  </script>
+</head>
+<body>
+  <nav class="main-nav">
+    <div class="logo-area">
+      <img src="assets/images/campus_logo.png" alt="Deakin Nexus Logo" class="logo">
+      <span class="brand">Deakin Nexus</span>
+    </div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="schedule.html">Schedule</a>
+      <a href="club.html">Clubs</a>
+      <a href="chat.html">Chat</a>
+      <a href="login.html" id="login-link">Login</a>
+      <a href="#" id="logout-link" style="display:none;">Log out</a>
+    </div>
+  </nav>
+  <main class="schedule-main">
+    <div class="schedule-title">Schedule</div>
+    <div class="schedule-tabs">
+      <button id="tab-today" class="tab-btn active" onclick="showTab('today')">Today</button>
+      <button id="tab-week" class="tab-btn" onclick="showTab('week')">This Week</button>
+    </div>
+    <div id="today-view">
+      <section class="today-section">
+        <div class="today-title" id="today-label">Monday's Schedule</div>
+        <div id="today-list"></div>
+      </section>
+    </div>
+    <div id="week-view" style="display:none;">
+      <section class="week-section">
+        <div class="week-btns">
+          <button class="outline-btn" onclick="openModal('modal-add')">+ Add Class</button>
+          <select class="select-day" onchange="switchDay(this.value)">
+            <option value="Monday">Switch to Daily View</option>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+          </select>
+          <button class="outline-btn" onclick="exportPDF()">Export to PDF</button>
+        </div>
+        <div class="week-table-wrap">
+          <table class="week-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Monday</th>
+                <th>Tuesday</th>
+                <th>Wednesday</th>
+                <th>Thursday</th>
+                <th>Friday</th>
+              </tr>
+            </thead>
+            <tbody id="week-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+    <!-- 课程详情弹窗 -->
+    <div class="modal-overlay" id="modal-detail" style="display:none;">
+      <div class="modal">
+        <button class="close-btn" onclick="closeModal('modal-detail')">&times;</button>
+        <h2 id="modal-detail-title"></h2>
+        <p><b>Time:</b> <span id="modal-detail-time"></span></p>
+        <p><b>Location:</b> <span id="modal-detail-location"></span></p>
+        <p><b>Description:</b> <span id="modal-detail-desc"></span></p>
+        <div style="margin-top:18px;display:flex;gap:12px;justify-content:center;">
+          <button id="detail-edit-btn" onclick="editSelectedClass()">Edit</button>
+          <button id="detail-delete-btn" style="background:#e53e3e;color:#fff;" onclick="deleteSelectedClass()">Delete</button>
+        </div>
+      </div>
+    </div>
+    <!-- 添加/编辑课程弹窗 -->
+    <div class="modal-overlay" id="modal-add" style="display:none;">
+      <div class="modal">
+        <button class="close-btn" onclick="closeModal('modal-add')">&times;</button>
+        <h2 id="add-title">Add or Edit Class</h2>
+        <form onsubmit="addClassSubmit(event)">
+          <label>Course Name<input id="add-name" type="text" placeholder="e.g. CSC101"></label>
+          <label>Day<select id="add-day"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option></select></label>
+          <label>Time<input id="add-time" type="text" placeholder="e.g. 9:00 AM – 10:00 AM"></label>
+          <label>Location<input id="add-location" type="text" placeholder="e.g. Room N112"></label>
+          <label>Description<input id="add-desc" type="text" placeholder="Optional"></label>
+          <div class="modal-btns">
+            <button type="submit">Save</button>
+            <button type="button" class="cancel" onclick="closeModal('modal-add')">Cancel</button>
+            <button type="button" id="delete-btn" style="display:none;background:#e53e3e;" onclick="deleteClass()">Delete</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</body>
+</html> 

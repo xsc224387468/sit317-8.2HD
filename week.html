@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Deakin Nexus - This Week</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    .schedule-title {
+      font-size: 2.5rem;
+      color: #234075;
+      font-weight: bold;
+      text-align: center;
+      margin: 48px 0 24px 0;
+    }
+    .schedule-tabs {
+      display: flex;
+      gap: 0;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+    .tab-btn {
+      background: #fff;
+      border: 2px solid #234075;
+      color: #234075;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border-radius: 8px 8px 0 0;
+      padding: 10px 40px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      margin-right: -2px;
+    }
+    .tab-btn.active, .tab-btn:hover {
+      background: #234075;
+      color: #fff;
+      border-bottom: 2px solid #fff;
+    }
+    .week-section {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .week-btns {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 18px;
+      justify-content: flex-end;
+      width: 100%;
+    }
+    .outline-btn {
+      background: #fff;
+      border: 2px solid #2b6cb0;
+      color: #2b6cb0;
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: 8px;
+      padding: 8px 18px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .outline-btn:hover {
+      background: #2b6cb0;
+      color: #fff;
+    }
+    .select-day {
+      width: 160px;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1.5px solid #b5c6e0;
+      font-size: 1rem;
+      margin-left: 12px;
+    }
+    .week-table-wrap {
+      overflow-x: auto;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(44, 62, 80, 0.08);
+      background: #fff;
+      margin-top: 16px;
+      width: 100%;
+    }
+    .week-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      font-size: 1rem;
+      margin-bottom: 24px;
+      border-radius: 16px;
+      overflow: hidden;
+      table-layout: fixed;
+    }
+    .week-table th, .week-table td {
+      border: 1.5px solid #e2e8f0;
+      min-width: 100px;
+      height: 60px;
+      position: relative;
+      padding: 0;
+      background: #f8fbff;
+      overflow: visible;
+    }
+    .week-table th {
+      background: #f8fbff;
+      color: #234075;
+      font-weight: bold;
+      font-size: 1.1rem;
+      height: 48px;
+    }
+    .calendar-cell { position: relative; background: #f8fbff; }
+    .calendar-event {
+      position: absolute;
+      left: 6px; right: 6px; top: 0;
+      background: #2b6cb0;
+      color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 8px 12px;
+      z-index: 2;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s;
+      border: 2px solid #fff;
+      height: 100%;
+    }
+    .calendar-event:hover { background: #234075; }
+    .calendar-event .event-title { font-weight: bold; font-size: 1.05rem; margin-bottom: 2px; }
+    .calendar-event .event-time { font-size: 0.95rem; margin-bottom: 2px; }
+    .calendar-event .event-location { font-size: 0.9rem; color: #e6f0fa; }
+    .week-table td.empty { background: #fff; }
+    .week-table td.occupied { background: transparent; border: none; pointer-events: none; }
+    .week-table tr { height: 60px; }
+    @media (max-width: 800px) { .week-table th, .week-table td { min-width: 80px; } }
+    /* 弹窗和遮罩样式 */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.25);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(44, 62, 80, 0.18);
+      padding: 32px 40px;
+      min-width: 340px;
+      max-width: 90vw;
+      z-index: 1001;
+      position: relative;
+    }
+    .modal h2 {
+      margin-top: 0;
+      color: #234075;
+    }
+    .modal .close-btn {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #888;
+      cursor: pointer;
+    }
+    .modal label {
+      display: block;
+      margin: 16px 0 8px 0;
+      color: #234075;
+      font-weight: 500;
+    }
+    .modal input, .modal select {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1.5px solid #b5c6e0;
+      margin-bottom: 12px;
+      font-size: 1rem;
+    }
+    .modal .modal-btns {
+      display: flex;
+      gap: 16px;
+      justify-content: flex-end;
+      margin-top: 18px;
+    }
+    .modal .modal-btns button {
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      background: #2b6cb0;
+      color: #fff;
+      transition: background 0.2s;
+    }
+    .modal .modal-btns button.cancel {
+      background: #bbb;
+      color: #fff;
+    }
+  </style>
+  <script>
+    let scheduleData = {
+      Monday: [
+        {time: '9:00 AM – 11:00 AM', name: 'Computer Networks', location: 'Room N112', desc: 'Learn about network protocols, topologies, and more.'},
+        {time: '2:00 PM – 3:00 PM', name: 'Meetup', location: 'Student Central', desc: 'Networking event for all students.'},
+        {time: '4:00 PM – 5:30 PM', name: 'Group Study', location: 'Library', desc: 'Collaborative study session for exam prep.'}
+      ],
+      Tuesday: [
+        {time: '10:00 AM – 12:00 PM', name: 'Database Systems', location: 'Room N215', desc: 'Database design and implementation.'},
+        {time: '2:00 PM – 4:00 PM', name: 'Programming Lab', location: 'Lab 3', desc: 'Practical programming exercises.'}
+      ],
+      Wednesday: [
+        {time: '9:00 AM – 10:00 AM', name: 'Tutorial', location: 'Room N112', desc: 'Weekly tutorial session.'},
+        {time: '1:00 PM – 3:00 PM', name: 'Project Meeting', location: 'Meeting Room 2', desc: 'Group project discussion.'}
+      ],
+      Thursday: [
+        {time: '11:00 AM – 1:00 PM', name: 'Web Development', location: 'Room N215', desc: 'Frontend and backend development.'},
+        {time: '3:00 PM – 5:00 PM', name: 'Workshop', location: 'Lab 1', desc: 'Hands-on coding workshop.'}
+      ],
+      Friday: [
+        {time: '9:00 AM – 12:00 PM', name: 'Final Project', location: 'Room N112', desc: 'Project presentation and review.'},
+        {time: '2:00 PM – 4:00 PM', name: 'Study Group', location: 'Library', desc: 'Group study session.'}
+      ]
+    };
+    let currentDay = 'Monday';
+    let editMode = false;
+    let editDay = null;
+    let editIdx = null;
+    function showTab(tab) {
+      if(tab==='today') window.location.href='schedule.html';
+      if(tab==='week') window.location.href='week.html';
+    }
+    function openModal(id) {
+      document.getElementById(id).style.display = 'flex';
+    }
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+      if(id==='modal-add') resetAddForm();
+    }
+    function switchDay(day) {
+      currentDay = day;
+      document.getElementById('today-label').innerText = day + "'s Schedule";
+      renderToday();
+    }
+    function renderToday() {
+      // 占位
+    }
+    function showDetail(idx) {
+      // 占位
+    }
+    function resetAddForm() {
+      editMode = false; editDay = null; editIdx = null;
+      document.getElementById('add-title').innerText = 'Add or Edit Class';
+      document.getElementById('add-name').value = '';
+      document.getElementById('add-day').value = 'Monday';
+      document.getElementById('add-time').value = '';
+      document.getElementById('add-location').value = '';
+      document.getElementById('add-desc').value = '';
+      document.getElementById('delete-btn').style.display = 'none';
+    }
+    function editClass(day, idx) {
+      editMode = true; editDay = day; editIdx = idx;
+      const item = scheduleData[day][idx];
+      document.getElementById('add-title').innerText = 'Edit Class';
+      document.getElementById('add-name').value = item.name;
+      document.getElementById('add-day').value = day;
+      document.getElementById('add-time').value = item.time;
+      document.getElementById('add-location').value = item.location;
+      document.getElementById('add-desc').value = item.desc;
+      document.getElementById('delete-btn').style.display = 'inline-block';
+      openModal('modal-add');
+    }
+    function addClassSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('add-name').value;
+      const day = document.getElementById('add-day').value;
+      const time = document.getElementById('add-time').value;
+      const location = document.getElementById('add-location').value;
+      const desc = document.getElementById('add-desc').value;
+      if(!name||!day||!time||!location) return alert('Please fill all fields');
+      if(editMode) {
+        scheduleData[editDay][editIdx] = {name, day, time, location, desc};
+      } else {
+        scheduleData[day].push({time, name, location, desc});
+      }
+      closeModal('modal-add');
+      if(currentDay===day||currentDay===editDay) renderToday();
+      renderWeek();
+    }
+    function deleteClass() {
+      if(editMode && editDay!==null && editIdx!==null) {
+        scheduleData[editDay].splice(editIdx,1);
+        closeModal('modal-add');
+        if(currentDay===editDay) renderToday();
+        renderWeek();
+      }
+    }
+    // 对齐到最近的整点
+    function alignToHour(time, round) {
+      const [h, m, p] = parseTime(time);
+      let minutes = h % 12 * 60 + m + (p === 'PM' ? 12 * 60 : 0);
+      if (round === 'down') {
+        minutes = Math.floor(minutes / 60) * 60;
+      } else {
+        minutes = Math.ceil(minutes / 60) * 60;
+      }
+      let nh = Math.floor(minutes / 60) % 12;
+      if (nh === 0) nh = 12;
+      let nm = minutes % 60;
+      let np = minutes < 12 * 60 ? 'AM' : 'PM';
+      return formatTime(nh, nm, np);
+    }
+    // 页面加载时批量转换 scheduleData 为整点
+    function batchAlignScheduleDataToHour() {
+      Object.keys(scheduleData).forEach(day => {
+        scheduleData[day] = scheduleData[day].map(ev => {
+          let [start, end] = ev.time.split(' – ');
+          const origStart = start, origEnd = end;
+          start = alignToHour(start, 'down');
+          end = alignToHour(end, 'up');
+          // 删除原本就是半小时起止的课程
+          if (origStart !== start || origEnd !== end) {
+            // 只保留起止都为整点的
+            if (start.endsWith(':00 AM') || start.endsWith(':00 PM')) {
+              if (end.endsWith(':00 AM') || end.endsWith(':00 PM')) {
+                return { ...ev, time: start + ' – ' + end };
+              }
+            }
+            return null;
+          } else {
+            return { ...ev, time: start + ' – ' + end };
+          }
+        }).filter(Boolean);
+      });
+    }
+    // 只渲染整点时间行
+    function getAllHourSlots() {
+      return [
+        '9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM',
+        '3:00 PM','4:00 PM','5:00 PM'
+      ];
+    }
+    // 重写渲染逻辑
+    function renderWeek() {
+      const days = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+      const times = getAllHourSlots();
+      const table = document.getElementById('week-tbody');
+      table.innerHTML = '';
+      // 记录每个单元格是否被课程占用
+      const occupied = {};
+      days.forEach(day => { occupied[day] = Array(times.length-1).fill(false); });
+      // 标记每个课程的被占用格
+      days.forEach(day => {
+        (scheduleData[day]||[]).forEach(event => {
+          const [start, end] = event.time.split(' – ');
+          const startIdx = times.indexOf(start);
+          let endIdx = times.indexOf(end);
+          if (endIdx === -1) endIdx = times.length-1;
+          for(let i=startIdx+1;i<endIdx;i++) occupied[day][i]=true;
+        });
+      });
+      // 渲染每一行（每个时间段）
+      for(let rowIdx=0; rowIdx<times.length-1; rowIdx++) {
+        const tr = document.createElement('tr');
+        // 时间列严格渲染所有整点
+        const timeTd = document.createElement('td');
+        timeTd.textContent = times[rowIdx];
+        tr.appendChild(timeTd);
+        // 每天
+        for(let dayIdx=0; dayIdx<days.length; dayIdx++) {
+          const day = days[dayIdx];
+          // 查找该时间段是否有课程开始
+          const event = (scheduleData[day]||[]).find(item => {
+            const [start] = item.time.split(' – ');
+            return start === times[rowIdx];
+          });
+          if (event) {
+            // 计算跨多少格
+            const [start, end] = event.time.split(' – ');
+            const startIdx = times.indexOf(start);
+            let endIdx = times.indexOf(end);
+            if (endIdx === -1) endIdx = times.length-1;
+            const duration = Math.max(1, endIdx - startIdx);
+            // 渲染课程卡片（只在起始格显示）
+            const td = document.createElement('td');
+            td.className = 'calendar-cell';
+            td.style.verticalAlign = 'top';
+            td.style.position = 'relative';
+            td.style.padding = '0';
+            td.style.height = `60px`;
+            td.colSpan = 1;
+            td.rowSpan = 1;
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'calendar-event';
+            eventDiv.style.height = `calc(${duration} * 60px - 12px)`;
+            eventDiv.style.position = 'absolute';
+            eventDiv.style.left = '6px';
+            eventDiv.style.right = '6px';
+            eventDiv.style.top = '0';
+            eventDiv.onclick = () => editClass(day, (scheduleData[day]||[]).findIndex(e => e.name === event.name && e.time === event.time));
+            eventDiv.innerHTML = `<div class='event-title'>${event.name}</div><div class='event-time'>${event.time}</div><div class='event-location'>${event.location}</div>`;
+            td.appendChild(eventDiv);
+            tr.appendChild(td);
+          } else if (occupied[day][rowIdx]) {
+            // 渲染透明占位格
+            const td = document.createElement('td');
+            td.className = 'occupied';
+            td.innerHTML = '';
+            tr.appendChild(td);
+          } else {
+            // 空白单元格
+            const td = document.createElement('td');
+            td.className = 'empty';
+            td.innerHTML = '';
+            tr.appendChild(td);
+          }
+        }
+        table.appendChild(tr);
+      }
+    }
+    function exportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text('Weekly Schedule', 10, 10);
+      let y = 20;
+      const days = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+      days.forEach(day => {
+        doc.text(day+':', 10, y);
+        (scheduleData[day]||[]).forEach(item => {
+          y+=8;
+          doc.text(`- ${item.time} ${item.name} (${item.location})`, 16, y);
+        });
+        y+=10;
+      });
+      doc.save('schedule.pdf');
+    }
+    window.onload = function() {
+      batchAlignScheduleDataToHour();
+      renderWeek();
+    };
+  </script>
+</head>
+<body>
+  <nav class="main-nav">
+    <div class="logo-area">
+      <img src="assets/images/campus_logo.png" alt="Deakin Nexus Logo" class="logo">
+      <span class="brand">Deakin Nexus</span>
+    </div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="schedule.html">Schedule</a>
+      <a href="club.html">Clubs</a>
+      <a href="chat.html">Chat</a>
+      <a href="login.html">Login</a>
+    </div>
+  </nav>
+  <main class="schedule-main">
+    <div class="schedule-title">Schedule</div>
+    <div class="schedule-tabs">
+      <button id="tab-today" class="tab-btn" onclick="showTab('today')">Today</button>
+      <button id="tab-week" class="tab-btn active" onclick="showTab('week')">This Week</button>
+    </div>
+    <section class="week-section">
+      <div class="week-btns">
+        <button class="outline-btn" onclick="openModal('modal-add')">+ Add Class</button>
+        <select class="select-day" onchange="switchDay(this.value)">
+          <option value="Monday">Switch to Daily View</option>
+          <option value="Monday">Monday</option>
+          <option value="Tuesday">Tuesday</option>
+          <option value="Wednesday">Wednesday</option>
+          <option value="Thursday">Thursday</option>
+          <option value="Friday">Friday</option>
+        </select>
+        <button class="outline-btn" onclick="exportPDF()">Export to PDF</button>
+      </div>
+      <div class="week-table-wrap">
+        <table class="week-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Monday</th>
+              <th>Tuesday</th>
+              <th>Wednesday</th>
+              <th>Thursday</th>
+              <th>Friday</th>
+            </tr>
+          </thead>
+          <tbody id="week-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+    <!-- 添加/编辑课程弹窗 -->
+    <div class="modal-overlay" id="modal-add" style="display:none;">
+      <div class="modal">
+        <button class="close-btn" onclick="closeModal('modal-add')">&times;</button>
+        <h2 id="add-title">Add or Edit Class</h2>
+        <form onsubmit="addClassSubmit(event)">
+          <label>Course Name<input id="add-name" type="text" placeholder="e.g. CSC101"></label>
+          <label>Day<select id="add-day"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option></select></label>
+          <label>Time<input id="add-time" type="text" placeholder="e.g. 9:00 AM – 10:00 AM"></label>
+          <label>Location<input id="add-location" type="text" placeholder="e.g. Room N112"></label>
+          <label>Description<input id="add-desc" type="text" placeholder="Optional"></label>
+          <div class="modal-btns">
+            <button type="submit">Save</button>
+            <button type="button" class="cancel" onclick="closeModal('modal-add')">Cancel</button>
+            <button type="button" id="delete-btn" style="display:none;background:#e53e3e;" onclick="deleteClass()">Delete</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</body>
+</html> 
